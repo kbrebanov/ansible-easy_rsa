@@ -1,6 +1,8 @@
 easy_rsa
 ========
 
+[![Ansible Role](https://img.shields.io/ansible/role/5832.svg)](https://galaxy.ansible.com/list#/roles/5832)
+
 Installs and configures easy-rsa
 
 Requirements
