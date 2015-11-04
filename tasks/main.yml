@@ -37,15 +37,6 @@
     mode=0644
   tags: easy_rsa
 
-#- name: Create openssl configuration file
-#  template: >
-#    src=openssl.cnf.j2
-#    dest={{ easy_rsa_ca_dir }}/openssl.cnf
-#    owner=root
-#    group=root
-#    mode=0644
-#  tags: easy_rsa
-
 - name: Prep the keys directory
   shell: ". ./vars; ./clean-all >/dev/null"
   args:
