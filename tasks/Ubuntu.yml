@@ -3,4 +3,5 @@
 
 - name: Install easy-rsa packages
   apt: name={{ item }} state=present update_cache=yes
+  with_items: easy_rsa_packages
   tags: easy_rsa

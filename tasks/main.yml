@@ -13,10 +13,19 @@
   when: ansible_distribution == "Ubuntu"
   tags: easy_rsa
 
-- name: Create new CA directory
+- name: Create CA directory
   command: make-cadir {{ easy_rsa_ca_dir }}
   args:
-    creates: {{ easy_rsa_ca_dir }}
+    creates: "{{ easy_rsa_ca_dir }}"
+  tags: easy_rsa
+
+- name: Create keys directory
+  file: >
+    path={{ easy_rsa_key_dir }}
+    owner=root
+    group=root
+    mode=0700
+    state=directory
   tags: easy_rsa
 
 - name: Create vars configuration file
@@ -28,11 +37,47 @@
     mode=0644
   tags: easy_rsa
 
-- name: Create openssl configuration file
-  template: >
-    src=openssl.cnf.j2
-    dest={{ easy_rsa_ca_dir }}/openssl.cnf
-    owner=root
-    group=root
-    mode=0644
+#- name: Create openssl configuration file
+#  template: >
+#    src=openssl.cnf.j2
+#    dest={{ easy_rsa_ca_dir }}/openssl.cnf
+#    owner=root
+#    group=root
+#    mode=0644
+#  tags: easy_rsa
+
+- name: Prep the keys directory
+  shell: ". ./vars; ./clean-all >/dev/null"
+  args:
+    chdir: "{{ easy_rsa_ca_dir }}"
+    creates: "{{ easy_rsa_key_dir }}/index.txt"
+  tags: easy_rsa
+
+- name: Generate Diffie-Hellman parameters
+  shell: ". ./vars; ./build-dh >/dev/null"
+  args:
+    chdir: "{{ easy_rsa_ca_dir }}"
+    creates: "{{ easy_rsa_key_dir }}/dh{{ easy_rsa_key_size }}.pem"
+  tags: easy_rsa
+
+- name: Build CA
+  shell: ". ./vars; ./pkitool --initca >/dev/null"
+  args:
+    chdir: "{{ easy_rsa_ca_dir }}"
+    creates: "{{ easy_rsa_key_dir }}/ca.key"
+  tags: easy_rsa
+
+- name: Generate server certificate and key
+  shell: ". ./vars; ./pkitool --server {{ easy_rsa_key_name }} >/dev/null"
+  args:
+    chdir: "{{ easy_rsa_ca_dir }}"
+    creates: "{{ easy_rsa_key_dir }}/{{ easy_rsa_key_name }}.key"
+  tags: easy_rsa
+
+- name: Generate client certificates and keys
+  shell: ". ./vars; ./pkitool {{ item }} >/dev/null"
+  args:
+    chdir: "{{ easy_rsa_ca_dir }}"
+    creates: "{{ easy_rsa_key_dir }}/{{ item }}.key"
+  with_items: easy_rsa_clients
   tags: easy_rsa
