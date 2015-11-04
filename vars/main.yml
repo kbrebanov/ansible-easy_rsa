@@ -1,2 +1,4 @@
 ---
 # vars file for easy_rsa
+
+easy_rsa_ca_dir: /etc/easy-rsa

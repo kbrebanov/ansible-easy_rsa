@@ -1,2 +1,38 @@
 ---
 # tasks file for easy_rsa
+
+- name: Include distribution specific variables
+  include_vars: "{{ ansible_distribution }}.yml"
+  tags: easy_rsa
+
+- include: CentOS.yml
+  when: ansible_distribution == "CentOS"
+  tags: easy_rsa
+
+- include: Ubuntu.yml
+  when: ansible_distribution == "Ubuntu"
+  tags: easy_rsa
+
+- name: Create new CA directory
+  command: make-cadir {{ easy_rsa_ca_dir }}
+  args:
+    creates: {{ easy_rsa_ca_dir }}
+  tags: easy_rsa
+
+- name: Create vars configuration file
+  template: >
+    src=vars.j2
+    dest={{ easy_rsa_ca_dir }}/vars
+    owner=root
+    group=root
+    mode=0644
+  tags: easy_rsa
+
+- name: Create openssl configuration file
+  template: >
+    src=openssl.cnf.j2
+    dest={{ easy_rsa_ca_dir }}/openssl.cnf
+    owner=root
+    group=root
+    mode=0644
+  tags: easy_rsa
