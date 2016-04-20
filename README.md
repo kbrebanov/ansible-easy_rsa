@@ -8,13 +8,13 @@ Installs and configures easy-rsa
 Requirements
 ------------
 
-This role requires Ansible 1.4 or higher.
+This role requires Ansible 1.9 or higher.
 
 Role Variables
 --------------
 
 | Name                  | Default                | Description                                  |
-|-----------------------|------------------------|----------------------------------------------|
+|:----------------------|:-----------------------|:---------------------------------------------|
 | easy_rsa_ca_expire    | 3650                   | Number of days that CA is valid for          |
 | easy_rsa_clients      | []                     | List of client certificates/keys to generate |
 | easy_rsa_key_city     | "SanFrancisco"         | City                                         |
