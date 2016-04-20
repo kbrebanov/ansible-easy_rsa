@@ -36,14 +36,14 @@ Example Playbook
 ----------------
 
 Install easy-rsa
-```
+```yaml
 - hosts: all
   roles:
     - kbrebanov.easy_rsa
 ```
 
 Install easy-rsa and generate a client cert/key
-```
+```yaml
 - hosts: all
   vars:
     easy_rsa_clients:
