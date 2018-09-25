@@ -3,6 +3,7 @@
 
 easy_rsa_ca_expire: 3650
 easy_rsa_clients: []
+easy_rsa_clients_revoke: []
 easy_rsa_key_city: "SanFrancisco"
 easy_rsa_key_country: "US"
 easy_rsa_key_email: "me@myhost.mydomain"

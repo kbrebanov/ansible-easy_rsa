@@ -96,6 +96,33 @@
   tags:
     - easy_rsa
 
+- name: Check list of clients vs revokes
+  fail: msg="There are clients set to create and revoke at the same time. Can't be"
+  when: "{{ (easy_rsa_clients | intersect(easy_rsa_clients_revoke) | length) > 0 }}"
+
+- name: Check certificate index
+  become: yes
+  command: awk '$0 ~ /\/CN={{ item }}\// {} END {print $1}' "{{ easy_rsa_key_dir }}/index.txt"
+  register: certificate_index
+  with_items: "{{ easy_rsa_clients_revoke }}"
+  always_run: true
+
+- name: Revoke client certificates
+  become: yes
+  shell: ". ./vars; ./revoke-full {{ item }}"
+  args:
+    chdir: "{{ easy_rsa_ca_dir }}"
+  with_items:
+    - "{{ easy_rsa_clients_revoke }}"
+  when: (certificate_index.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | list | first | default("R")) == "V"
+  register: revoke_return
+  failed_when: revoke_return.rc > 0 and revoke_return.rc != 2
+
+- name: Remove revoke client *.key file
+  become: yes
+  file: path="{{ easy_rsa_key_dir }}/{{ item}}.key" state=absent
+  with_items: "{{ revoke_return.results | selectattr('changed') | map(attribute='item') | list }}"
+
 - name: Generate client certificates and keys
   become: yes
   shell: ". ./vars; ./pkitool {{ item }} >/dev/null"
@@ -104,5 +131,7 @@
     creates: "{{ easy_rsa_key_dir }}/{{ item }}.key"
   with_items:
     - "{{ easy_rsa_clients }}"
+  when: (certificate_index.results | selectattr('item', 'equalto', item) | map(attribute='stdout') | list | first | default("R")) != "V"
   tags:
     - easy_rsa
+
